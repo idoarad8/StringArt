@@ -8,25 +8,29 @@ class EnumsConfig:
     X = 0
     Y = 1
     DEGREE = 2
+    OBJECT_ID = 0
+    OBJECT = 1
 
 
-class CircleConfig:
-    RESOLUTION = 500
-    RADIUS = 200
+class ScreenConfig:
+    RADIUS = 300
     DIAMETER = RADIUS*2
+    NAIL_RESOLUTION = 500
     NAIL_RADIUS = 1
 
 
 class ImageConfig:
-    IMAGE_PATH = './circle.jpg'
+    IMAGE_PATH = './Test_Images/Whiter.jpg'
     SHOW_SINOGRAM = True
+    IMAGE_FILTER_THRESHOLD = 0 #grayscale range is [0, 1]
+    BLOCK_DEFAULT = False
 
 
 # ConstantsManagement class
 class ConstantsManagement:
     def __init__(self):
         # Set constants from separate classes as attributes
-        for cls in [AppConfig, CircleConfig, EnumsConfig, ImageConfig]:
+        for cls in [AppConfig, ScreenConfig, EnumsConfig, ImageConfig]:
             for key, value in cls.__dict__.items():
                 if not key.startswith("__"):
                     self.__dict__.update(**{key: value})
