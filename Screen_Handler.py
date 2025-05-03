@@ -3,8 +3,9 @@ from graphics import *
 
 
 class Screen:
-    def __init__(self, width=Consts.DIAMETER, height=Consts.DIAMETER):
-        height = height or Consts.HEIGHT
+    def __init__(self):
+        width = Consts.DIAMETER
+        height = Consts.DIAMETER
         self.win = GraphWin("String Arts", width, height)
         self.win.setCoords(0, 0, width, height)
         self.objects = []

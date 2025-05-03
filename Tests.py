@@ -1,7 +1,7 @@
 from Screen_Handler import Screen
 from Image_Processing import ImageProcessor
 from skimage.transform import iradon
-
+from Generator import Generator
 
 def screen_test():
     screen = Screen()
@@ -16,13 +16,18 @@ def screen_test():
 def image_proc_test():
     image = ImageProcessor()
     image.show()
-    image.show_sinogram()
+    image.show_sinogram(normalized=True)
     # image.show_sinogram(spread=True)
     ImageProcessor.show_image(image.line_radon_approx(150, 200), "radon line approx")
     ImageProcessor.show_image(image.line_radon_approx(150, 200)[190:210, 140:160], "radon line approx (Cool Area)")
     ImageProcessor.show_image(iradon(image.sinogram), "inverse of radon")
 
+def test_generator():
+    gen = Generator()
+    print(gen.points)
+
 
 if __name__ == "__main__":
-    image_proc_test()
+    # image_proc_test()
+    test_generator()
     screen_test()

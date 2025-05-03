@@ -8,14 +8,13 @@ import math
 from constants import Consts
 
 
-# TODO: radon was updated. update show_sinogram to have an option to show it normelized to 180. make sure the rest of the function are ok with the new radon
-
 class ImageProcessor:
 
     def __init__(self, path=Consts.IMAGE_PATH):
         self.image = io.imread(path, as_gray=True)
         self.mask_and_fit_image()
-        self.sinogram = self.radon(self.image, Consts.SHOW_SINOGRAM)
+        self.sinogram = self.radon(rotate(self.image, Consts.ROTATE_CONST), Consts.SHOW_SINOGRAM,
+                                   theta=np.linspace(0, 180, int(Consts.NAIL_RESOLUTION / 2)))
         if Consts.IS_UBUNTU:
             plt.switch_backend('WebAgg')
 
@@ -64,8 +63,32 @@ class ImageProcessor:
     def show(self, block=Consts.BLOCK_DEFAULT):
         self.show_image(self.image, "The Image", block=block)
 
-    def show_sinogram(self, block=Consts.BLOCK_DEFAULT):
-        self.show_image(self.sinogram, "Image Sinogram", block=block)
+    def show_sinogram(self, block=Consts.BLOCK_DEFAULT, normalized=False):
+        if normalized:
+            fig, ax1 = plt.subplots(1, 1, figsize=(8, 4.5))
+            ax1.set_title("Normalized Sinogram")
+            ax1.set_xlabel("Projection angle (deg)")
+            ax1.set_ylabel("Projection position (pixels)")
+            ax1.imshow(self.sinogram, aspect='auto', extent=(0, 180, Consts.DIAMETER, 0), cmap='gray')
+            plt.show(block=block)
+        else:
+            self.show_image(self.sinogram, "Image Sinogram", block=block)
+
+    @staticmethod
+    def radon(im, print_sinogram=False, block=Consts.BLOCK_DEFAULT, theta=None):
+        # The angles that we care about in this program are equally spaced on a circle
+        # and so half of them are equally spaced on a 180 degree arc
+        sinogram = radon(im, theta=theta, circle=True)
+        if print_sinogram:
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
+            ax1.set_title("Original")
+            ax1.imshow(im, cmap='gray')
+            ax2.set_title("Radon transform\n(Sinogram)")
+            ax2.set_xlabel("Projection angle (deg)")
+            ax2.set_ylabel("Projection position (pixels)")
+            ax2.imshow(sinogram, aspect='auto', cmap='gray')
+            plt.show(block=block)
+        return sinogram
 
     @staticmethod
     def show_image(img, title=None, block=Consts.BLOCK_DEFAULT):
@@ -76,27 +99,17 @@ class ImageProcessor:
         plt.show(block=block)
 
     @staticmethod
-    def radon(im, print_sinogram=False, block=Consts.BLOCK_DEFAULT):
-        # The angles that we care about in this program are equally spaced on a circle
-        # and so half of them are equally spaced on a 180 degree arc
-        theta = np.linspace(0, 180, int(Consts.NAIL_RESOLUTION / 2))
-        sinogram = radon(rotate(im, Consts.ROTATE_CONST), theta=theta, circle=True)
-        if print_sinogram:
-            dx, dy = 0.5 * 180.0 / max(im.shape), 0.5 / sinogram.shape[0]
-            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
-            ax1.set_title("Original")
-            ax1.imshow(im)
-            ax2.set_title("Radon transform\n(Sinogram)")
-            ax2.set_xlabel("Projection angle (deg)")
-            ax2.set_ylabel("Projection position (pixels)")
-            ax2.imshow(sinogram, aspect='auto')
-            plt.show(block=block)
-        return sinogram
-
-    @staticmethod
     def deg2rad(alpha):
         return alpha * math.pi / 180
 
     @staticmethod
     def rad2deg(alpha):
         return alpha * 180 / math.pi
+
+    @staticmethod
+    def normalize_sinogram_to_degrees(alpha_un_normalized):
+        return alpha_un_normalized * 180 / int(Consts.NAIL_RESOLUTION / 2)
+
+    @staticmethod
+    def normalize_sinogram_to_radians(alpha_un_normalized):
+        return alpha_un_normalized * math.pi / int(Consts.NAIL_RESOLUTION / 2)
