@@ -1,6 +1,7 @@
 from constants import Consts
 from graphics import *
 
+
 class Screen:
     def __init__(self, width=Consts.DIAMETER, height=Consts.DIAMETER):
         height = height or Consts.HEIGHT

@@ -1,0 +1,7 @@
+colorama==0.4.6
+graphics.py==5.0.1.post1
+matplotlib==3.10.1
+numpy==2.2.5
+Pillow==11.2.1
+scipy==1.15.2
+skimage==0.0
