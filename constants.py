@@ -15,15 +15,15 @@ class EnumsConfig:
 class ScreenConfig:
     RADIUS = 300
     DIAMETER = RADIUS * 2
-    NAIL_RESOLUTION = 500
-    NAIL_RADIUS = 1
+    NAIL_RESOLUTION = 300
+    MAX_NAIL_RADIUS = 5
 
 
 class ImageConfig:
     IMAGE_PATH = './Test_Images/diagonal_line_45_degree.png'
     SHOW_SINOGRAM = True
     IMAGE_FILTER_THRESHOLD = 0  # grayscale range is [0, 1]
-    ROTATE_CONST = 90
+    ROTATE_CONST = 0
     BLOCK_DEFAULT = False
 
 

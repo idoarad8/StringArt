@@ -1,7 +1,12 @@
+from difflib import restore
+
 from Screen_Handler import Screen
 from Image_Processing import ImageProcessor
 from skimage.transform import iradon
 from Generator import Generator
+
+from skimage.draw import line
+
 
 def screen_test():
     screen = Screen()
@@ -18,16 +23,24 @@ def image_proc_test():
     image.show()
     image.show_sinogram(normalized=True)
     # image.show_sinogram(spread=True)
-    ImageProcessor.show_image(image.line_radon_approx(150, 200), "radon line approx")
-    ImageProcessor.show_image(image.line_radon_approx(150, 200)[190:210, 140:160], "radon line approx (Cool Area)")
+    angle = 90
+    r = 200
+    print(f'angle:{angle}, r:{r}')
+    line_radon = image.line_radon_approx(angle, r)
+    ImageProcessor.show_image(line_radon, "radon line approx")
+    ImageProcessor.show_image(line_radon[r-10:r+10, angle-10:angle+10], "radon line approx (Cool Area)")
+    alpha1, alpha2 = ImageProcessor.sinogram_point_to_line(angle, r)
+    print(f'alpha1:{ImageProcessor.rad2deg(alpha1)} alpha2:{ImageProcessor.rad2deg(alpha2)}')
+    restored_angle, restored_r = ImageProcessor.line_to_sinogram_point(angles_in_radians=(alpha1, alpha2))
+    print(f'restored angle:{restored_angle}, restored r:{restored_r}')
     ImageProcessor.show_image(iradon(image.sinogram), "inverse of radon")
+
 
 def test_generator():
     gen = Generator()
-    print(gen.points)
 
 
 if __name__ == "__main__":
-    # image_proc_test()
-    test_generator()
+    image_proc_test()
+    # test_generator()
     screen_test()

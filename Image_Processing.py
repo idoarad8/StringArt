@@ -1,11 +1,13 @@
 import matplotlib.pyplot as plt
 from skimage import io
 from skimage.transform import radon, rescale, rotate
-from skimage.draw import line
 import numpy as np
 import math
 
 from constants import Consts
+
+
+# TODO: fix the convertion between sinogram and line (both ways). make sure i understand the radon angles and how they compare to the image
 
 
 class ImageProcessor:
@@ -73,6 +75,37 @@ class ImageProcessor:
             plt.show(block=block)
         else:
             self.show_image(self.sinogram, "Image Sinogram", block=block)
+
+    @staticmethod
+    def line_to_sinogram_point(angles_in_radians=None, points_coords=None):
+        if points_coords is None and angles_in_radians is None:
+            return None
+        elif points_coords is not None and angles_in_radians is None:
+            x1 = points_coords[0][Consts.X]
+            y1 = points_coords[0][Consts.Y]
+            x2 = points_coords[1][Consts.X]
+            y2 = points_coords[1][Consts.Y]
+            alpha1 = math.asin(y1 / math.sqrt(x1 ** 2 + y1 ** 2))
+            alpha2 = math.asin(y2 / math.sqrt(x2 ** 2 + y2 ** 2))
+        else:
+            alpha1 = angles_in_radians[0]
+            alpha2 = angles_in_radians[1]
+        if alpha1 == alpha2:
+            return None
+        alpha_radians = (alpha1 + alpha2) / 2
+        alpha_degrees = ImageProcessor.rad2deg(alpha_radians)
+        r = math.cos((alpha2 - alpha1) / 2) * Consts.RADIUS
+        return alpha_degrees, r
+
+    @staticmethod
+    def sinogram_point_to_line(alpha_degrees, r):
+        alpha_radians = ImageProcessor.deg2rad(alpha_degrees)
+        radius = Consts.RADIUS
+        alpha1 = alpha_radians + math.pi / 2 - math.acos((r - radius) / radius)
+        alpha2 = alpha_radians + math.pi / 2 + math.acos((r - radius) / radius)
+        if alpha1 == alpha2:
+            alpha2 += math.pi
+        return alpha1, alpha2
 
     @staticmethod
     def radon(im, print_sinogram=False, block=Consts.BLOCK_DEFAULT, theta=None):
