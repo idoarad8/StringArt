@@ -225,7 +225,6 @@ class App:
         r0_norm = r0 - radius
         # sinogram_mask = self.normalize_alpha_to_radians(col - alpha0) != 0 and (((row-radius)**2 + r0_norm**2 - 2*(row-radius)*r0_norm*math.cos(self.normalize_alpha_to_radians(col - alpha0)))/math.sin(self.normalize_alpha_to_radians(col - alpha0))**2).all() <= radius**2
         # self.show_image(sinogram_mask)
-        # TODO improve this. finish!
 
         line_sinogram = self.image_sinogram.copy()
         line_sinogram[:, :] = 0
