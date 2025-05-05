@@ -5,8 +5,7 @@ from constants import Consts
 from Image_Processing import ImageProcessor
 from Screen_Handler import Screen
 
-
-# TODO: finish initializing the generator. Check if the changes to Screen_Handler are ok (just changed INIT). do it!
+#TODO: find the maximum sinogram point when normalized. finish! normalize is
 
 class Generator:
     def __init__(self):
@@ -15,6 +14,7 @@ class Generator:
         self.radius = Consts.RADIUS
         self.center_x = Consts.RADIUS
         self.center_y = Consts.RADIUS
+        self.string_amount = Consts.STRING_AMOUNT
         self.points = []
         self.initialize()
 
@@ -42,4 +42,10 @@ class Generator:
         nail_radius = min(Consts.MAX_NAIL_RADIUS, computed_radius)
         for nail in self.points:
             self.screen.draw_circle(nail[Consts.X], nail[Consts.Y], nail_radius)
+
+    def max_normalized_line(self):
+        pass
+
+    def run(self):
+        pass
 

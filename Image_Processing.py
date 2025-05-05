@@ -92,9 +92,9 @@ class ImageProcessor:
             alpha2 = angles_in_radians[1]
         if alpha1 == alpha2:
             return None
-        alpha_radians = (alpha1 + alpha2) / 2
+        alpha_radians = (alpha1 + alpha2 - math.pi) / 2
         alpha_degrees = ImageProcessor.rad2deg(alpha_radians)
-        r = math.cos((alpha2 - alpha1) / 2) * Consts.RADIUS
+        r = math.cos((alpha2 - alpha1) / 2) * Consts.RADIUS + Consts.RADIUS
         return alpha_degrees, r
 
     @staticmethod

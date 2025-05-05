@@ -23,8 +23,8 @@ def image_proc_test():
     image.show()
     image.show_sinogram(normalized=True)
     # image.show_sinogram(spread=True)
-    angle = 90
-    r = 200
+    angle = 100
+    r = 500
     print(f'angle:{angle}, r:{r}')
     line_radon = image.line_radon_approx(angle, r)
     ImageProcessor.show_image(line_radon, "radon line approx")
