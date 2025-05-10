@@ -7,9 +7,6 @@ import math
 from constants import Consts
 
 
-# TODO: fix the convertion between sinogram and line (both ways). make sure i understand the radon angles and how they compare to the image
-
-
 class ImageProcessor:
 
     def __init__(self, path=Consts.IMAGE_PATH):
@@ -62,11 +59,45 @@ class ImageProcessor:
             delta_alpha_radians) ** 2 >= radius ** 2] = 0
         return line_sinogram
 
+    def normalize_sinogram(self, starting_point=None):
+        radius = Consts.RADIUS
+        nrows, ncols = self.sinogram.shape
+        r, angle = np.ogrid[:nrows, :ncols]
+        line_length = np.sqrt(radius ** 2 - (r - radius) ** 2)
+        line_length[line_length == 0] = radius
+        sinogram_normalizer = np.zeros(self.sinogram.shape)
+        sinogram_normalizer[:, :] = radius / line_length
+        normalized_sinogram = np.multiply(self.sinogram, sinogram_normalizer)
+        ImageProcessor.show_image(normalized_sinogram)
+        return normalized_sinogram
+
+    def mask_for_sinogram(self):
+        res = int(Consts.NAIL_RESOLUTION / 2)
+        angles = np.linspace(0, math.pi / 2, int(res / 2))
+        r = Consts.RADIUS + Consts.RADIUS * np.sin(angles)
+        r = np.rint(r).astype(int)
+        mask = np.ones(self.sinogram.shape)
+        mask[r[r < Consts.DIAMETER], :] = 0
+        mask[-r[r < Consts.DIAMETER], :] = 0
+        mask = np.array(mask, dtype=bool)
+        return mask
+
     def show(self, block=Consts.BLOCK_DEFAULT):
         self.show_image(self.image, "The Image", block=block)
 
-    def show_sinogram(self, block=Consts.BLOCK_DEFAULT, normalized=False):
-        if normalized:
+    def show_sinogram(self, block=Consts.BLOCK_DEFAULT, degrees_correct=False):
+        if degrees_correct:
+            fig, ax1 = plt.subplots(1, 1, figsize=(8, 4.5))
+            ax1.set_title("Normalized Sinogram")
+            ax1.set_xlabel("Projection angle (deg)")
+            ax1.set_ylabel("Projection position (pixels)")
+            ax1.imshow(self.sinogram, aspect='auto', extent=(0, 180, Consts.DIAMETER, 0), cmap='gray')
+            plt.show(block=block)
+        else:
+            self.show_image(self.sinogram, "Image Sinogram", block=block)
+
+    def show_normalized_sinogram(self, block=Consts.BLOCK_DEFAULT, degrees_correct=False):
+        if degrees_correct:
             fig, ax1 = plt.subplots(1, 1, figsize=(8, 4.5))
             ax1.set_title("Normalized Sinogram")
             ax1.set_xlabel("Projection angle (deg)")
@@ -95,17 +126,17 @@ class ImageProcessor:
         alpha_radians = (alpha1 + alpha2 - math.pi) / 2
         alpha_degrees = ImageProcessor.rad2deg(alpha_radians)
         r = math.cos((alpha2 - alpha1) / 2) * Consts.RADIUS + Consts.RADIUS
-        return alpha_degrees, r
+        return float(alpha_degrees % 180), r
 
     @staticmethod
     def sinogram_point_to_line(alpha_degrees, r):
         alpha_radians = ImageProcessor.deg2rad(alpha_degrees)
         radius = Consts.RADIUS
-        alpha1 = alpha_radians + math.pi / 2 - math.acos((r - radius) / radius)
-        alpha2 = alpha_radians + math.pi / 2 + math.acos((r - radius) / radius)
-        if alpha1 == alpha2:
-            alpha2 += math.pi
-        return alpha1, alpha2
+        alpha1_radians = alpha_radians + math.pi / 2 - math.acos((r - radius) / radius)
+        alpha2_radians = alpha_radians + math.pi / 2 + math.acos((r - radius) / radius)
+        if alpha1_radians == alpha2_radians:
+            alpha2_radians += math.pi
+        return alpha1_radians, alpha2_radians
 
     @staticmethod
     def radon(im, print_sinogram=False, block=Consts.BLOCK_DEFAULT, theta=None):
@@ -140,9 +171,9 @@ class ImageProcessor:
         return alpha * 180 / math.pi
 
     @staticmethod
-    def normalize_sinogram_to_degrees(alpha_un_normalized):
+    def convert_sinogram_to_degrees(alpha_un_normalized):
         return alpha_un_normalized * 180 / int(Consts.NAIL_RESOLUTION / 2)
 
     @staticmethod
-    def normalize_sinogram_to_radians(alpha_un_normalized):
+    def convert_sinogram_to_radians(alpha_un_normalized):
         return alpha_un_normalized * math.pi / int(Consts.NAIL_RESOLUTION / 2)
